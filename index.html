@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OJT Daily Time Record</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ===== SIDEBAR NAV ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">DTR</div>
+      <span class="logo-text">OJT Tracker</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-btn active" data-tab="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-btn" data-tab="log">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Time Log
+      </button>
+      <button class="nav-btn" data-tab="records">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Records
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="export-btn" id="exportPDF">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export PDF
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main-content">
+
+    <!-- ===== DASHBOARD TAB ===== -->
+    <section id="tab-dashboard" class="tab-section active">
+      <div class="page-header">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Your OJT overview at a glance</p>
+      </div>
+
+      <!-- Profile Card -->
+      <div class="profile-card">
+        <div class="profile-avatar" id="avatarInitials">ST</div>
+        <div class="profile-info">
+          <h2 id="displayName">Student Name</h2>
+          <p id="displayCourse">Course / Program</p>
+          <div class="profile-tags">
+            <span class="tag" id="displaySchool">School</span>
+            <span class="tag accent" id="displayCompany">Company</span>
+          </div>
+        </div>
+        <button class="edit-profile-btn" id="openProfileModal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit Profile
+        </button>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="statTotalHours">0.00</div>
+            <div class="stat-label">Total Hours Logged</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="statTotalDays">0</div>
+            <div class="stat-label">Days Rendered</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="statAvgHours">0.00</div>
+            <div class="stat-label">Avg Hours / Day</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="statRequired">500</div>
+            <div class="stat-label">Required Hours</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-section">
+        <div class="progress-header">
+          <span>OJT Completion Progress</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+        </div>
+        <p class="progress-note" id="progressNote">Keep going! You're just getting started.</p>
+      </div>
+
+      <!-- Recent Entries -->
+      <div class="recent-section">
+        <h3 class="section-title">Recent Entries</h3>
+        <div id="recentEntries" class="recent-list">
+          <p class="empty-state">No entries yet. Start logging your time!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TIME LOG TAB ===== -->
+    <section id="tab-log" class="tab-section">
+      <div class="page-header">
+        <h1 class="page-title">Time Log</h1>
+        <p class="page-subtitle">Record your daily time in and out</p>
+      </div>
+
+      <div class="log-card">
+        <div class="live-clock" id="liveClock">00:00:00</div>
+        <p class="live-date" id="liveDate">Loading...</p>
+
+        <div class="form-group">
+          <label for="entryDate">Date</label>
+          <input type="date" id="entryDate" />
+        </div>
+
+        <div class="time-row">
+          <div class="form-group">
+            <label>Time In</label>
+            <div class="time-display" id="timeInDisplay">--:-- --</div>
+          </div>
+          <div class="form-group">
+            <label>Time Out</label>
+            <div class="time-display" id="timeOutDisplay">--:-- --</div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="time-btn in" id="btnTimeIn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Time In
+          </button>
+          <button class="time-btn out" id="btnTimeOut" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 8 14"/></svg>
+            Time Out
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label for="taskDesc">Task / Activities Done</label>
+          <textarea id="taskDesc" rows="3" placeholder="Describe what you did today..."></textarea>
+        </div>
+
+        <div class="computed-hours" id="computedHoursBox" style="display:none">
+          Hours Worked Today: <strong id="computedHoursVal">0.00 hrs</strong>
+        </div>
+
+        <button class="save-btn" id="btnSaveEntry">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save Entry
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== RECORDS TAB ===== -->
+    <section id="tab-records" class="tab-section">
+      <div class="page-header">
+        <h1 class="page-title">All Records</h1>
+        <p class="page-subtitle">View, edit, and manage your DTR entries</p>
+      </div>
+
+      <div class="records-toolbar">
+        <input type="search" id="searchInput" placeholder="Search by date or task..." />
+        <button class="clear-all-btn" id="btnClearAll">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          Clear All
+        </button>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="dtrTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Time In</th>
+              <th>Time Out</th>
+              <th>Total Hours</th>
+              <th>Task Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dtrTableBody">
+            <tr>
+              <td colspan="7" class="empty-row">No records found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== PROFILE MODAL ===== -->
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Edit Profile</h2>
+        <button class="modal-close" id="closeProfileModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="inputName" placeholder="e.g. Juan dela Cruz" />
+        </div>
+        <div class="form-group">
+          <label>Course / Program</label>
+          <input type="text" id="inputCourse" placeholder="e.g. BS Information Technology" />
+        </div>
+        <div class="form-group">
+          <label>School / University</label>
+          <input type="text" id="inputSchool" placeholder="e.g. University of the Philippines" />
+        </div>
+        <div class="form-group">
+          <label>Company / Organization</label>
+          <input type="text" id="inputCompany" placeholder="e.g. Acme Corporation" />
+        </div>
+        <div class="form-group">
+          <label>Required OJT Hours</label>
+          <input type="number" id="inputRequired" placeholder="e.g. 500" min="1" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="cancelProfileModal">Cancel</button>
+        <button class="btn-save" id="saveProfile">Save Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EDIT ENTRY MODAL ===== -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Edit Entry</h2>
+        <button class="modal-close" id="closeEditModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editId" />
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="editDate" />
+        </div>
+        <div class="form-group">
+          <label>Time In</label>
+          <input type="time" id="editTimeIn" />
+        </div>
+        <div class="form-group">
+          <label>Time Out</label>
+          <input type="time" id="editTimeOut" />
+        </div>
+        <div class="form-group">
+          <label>Task Description</label>
+          <textarea id="editTask" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="cancelEditModal">Cancel</button>
+        <button class="btn-save" id="saveEdit">Update Entry</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TOAST ===== -->
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
