@@ -1,14 +1,17 @@
 /**
  * OJT Daily Time Record — script.js
  * Fully offline. Uses localStorage for all data persistence.
+ * Updated: Time In state is now saved to LocalStorage
+ *          so it persists even after closing/reopening the browser.
  */
 
 // =============================================
 // STORAGE KEYS
 // =============================================
 const KEYS = {
-  profile : 'dtr_profile',
-  records : 'dtr_records',
+  profile      : 'dtr_profile',
+  records      : 'dtr_records',
+  activeTimeIn : 'dtr_active_timein',  // NEW: saves current Time In state
 };
 
 // =============================================
@@ -41,6 +44,25 @@ function getRecords() {
 /** Save records array to localStorage */
 function saveRecords(records) {
   localStorage.setItem(KEYS.records, JSON.stringify(records));
+}
+
+/**
+ * Save the active Time In session to localStorage
+ * so it persists even when the browser is closed.
+ */
+function saveActiveTimeIn(date, timeIn24) {
+  localStorage.setItem(KEYS.activeTimeIn, JSON.stringify({ date, timeIn24 }));
+}
+
+/** Load the active Time In session from localStorage */
+function getActiveTimeIn() {
+  const raw = localStorage.getItem(KEYS.activeTimeIn);
+  return raw ? JSON.parse(raw) : null;
+}
+
+/** Clear the active Time In session (after saving the entry) */
+function clearActiveTimeIn() {
+  localStorage.removeItem(KEYS.activeTimeIn);
 }
 
 /** Generate a simple unique ID */
@@ -168,12 +190,12 @@ function renderDashboard() {
   document.getElementById('progressPercent').textContent = pct.toFixed(1) + '%';
 
   let note = '';
-  if      (pct === 0)    note = "Keep going! You're just getting started.";
-  else if (pct < 25)     note = "Great start! Keep the momentum going.";
-  else if (pct < 50)     note = "You're making real progress! Almost halfway there.";
-  else if (pct < 75)     note = "More than halfway done! You're doing great.";
-  else if (pct < 100)    note = "Almost there! Just a little more to go.";
-  else                   note = "🎉 Congratulations! You've completed your OJT hours!";
+  if      (pct === 0)  note = "Keep going! You're just getting started.";
+  else if (pct < 25)   note = "Great start! Keep the momentum going.";
+  else if (pct < 50)   note = "You're making real progress! Almost halfway there.";
+  else if (pct < 75)   note = "More than halfway done! You're doing great.";
+  else if (pct < 100)  note = "Almost there! Just a little more to go.";
+  else                 note = "🎉 Congratulations! You've completed your OJT hours!";
   document.getElementById('progressNote').textContent = note;
 
   // Recent entries (last 5)
@@ -201,11 +223,11 @@ function renderDashboard() {
 // PROFILE MODAL
 // =============================================
 function initProfileModal() {
-  const modal   = document.getElementById('profileModal');
-  const openBtn = document.getElementById('openProfileModal');
-  const closeBtn = document.getElementById('closeProfileModal');
+  const modal     = document.getElementById('profileModal');
+  const openBtn   = document.getElementById('openProfileModal');
+  const closeBtn  = document.getElementById('closeProfileModal');
   const cancelBtn = document.getElementById('cancelProfileModal');
-  const saveBtn = document.getElementById('saveProfile');
+  const saveBtn   = document.getElementById('saveProfile');
 
   function openModal() {
     const p = getProfile();
@@ -251,43 +273,76 @@ function initTimeLog() {
   const dd    = String(today.getDate()).padStart(2, '0');
   document.getElementById('entryDate').value = `${yyyy}-${mm}-${dd}`;
 
+  const timeInBtn   = document.getElementById('btnTimeIn');
+  const timeOutBtn  = document.getElementById('btnTimeOut');
+  const timeInDisp  = document.getElementById('timeInDisplay');
+  const timeOutDisp = document.getElementById('timeOutDisplay');
+  const hoursBox    = document.getElementById('computedHoursBox');
+  const hoursVal    = document.getElementById('computedHoursVal');
+
+  // -----------------------------------------------
+  // NEW: Restore Time In state from LocalStorage
+  // This runs every time the page loads/refreshes
+  // -----------------------------------------------
   let timeIn24  = '';
   let timeOut24 = '';
 
-  const timeInBtn  = document.getElementById('btnTimeIn');
-  const timeOutBtn = document.getElementById('btnTimeOut');
-  const timeInDisp = document.getElementById('timeInDisplay');
-  const timeOutDisp = document.getElementById('timeOutDisplay');
-  const hoursBox   = document.getElementById('computedHoursBox');
-  const hoursVal   = document.getElementById('computedHoursVal');
+  const saved = getActiveTimeIn();
+  if (saved) {
+    // May naka-save na Time In session!
+    timeIn24 = saved.timeIn24;
+    document.getElementById('entryDate').value = saved.date;
+    timeInDisp.textContent = to12h(saved.timeIn24);
+    timeInBtn.disabled  = true;   // Naka-Time In na
+    timeOutBtn.disabled = false;  // Pwede nang mag-Time Out
+    showToast('🟢 Welcome back! Your Time In is still recorded.');
+  }
 
+  // -----------------------------------------------
+  // TIME IN button
+  // -----------------------------------------------
   timeInBtn.addEventListener('click', () => {
-    const now = new Date();
-    const h = String(now.getHours()).padStart(2,'0');
-    const m = String(now.getMinutes()).padStart(2,'0');
-    timeIn24 = `${h}:${m}`;
+    const now  = new Date();
+    const h    = String(now.getHours()).padStart(2,'0');
+    const m    = String(now.getMinutes()).padStart(2,'0');
+    timeIn24   = `${h}:${m}`;
+
+    const date = document.getElementById('entryDate').value;
+
     timeInDisp.textContent = formatTime12(now);
-    timeInBtn.disabled  = true;
-    timeOutBtn.disabled = false;
+    timeInBtn.disabled     = true;
+    timeOutBtn.disabled    = false;
+
+    // NEW: I-save agad ang Time In sa LocalStorage
+    saveActiveTimeIn(date, timeIn24);
+
     showToast('🟢 Time In recorded!');
   });
 
+  // -----------------------------------------------
+  // TIME OUT button
+  // -----------------------------------------------
   timeOutBtn.addEventListener('click', () => {
     const now = new Date();
-    const h = String(now.getHours()).padStart(2,'0');
-    const m = String(now.getMinutes()).padStart(2,'0');
+    const h   = String(now.getHours()).padStart(2,'0');
+    const m   = String(now.getMinutes()).padStart(2,'0');
     timeOut24 = `${h}:${m}`;
+
     timeOutDisp.textContent = formatTime12(now);
 
     const hrs = calcHours(timeIn24, timeOut24);
-    hoursVal.textContent = hrs.toFixed(2) + ' hrs';
+    hoursVal.textContent   = hrs.toFixed(2) + ' hrs';
     hoursBox.style.display = 'block';
+
     showToast('🔴 Time Out recorded!');
   });
 
+  // -----------------------------------------------
+  // SAVE ENTRY button
+  // -----------------------------------------------
   document.getElementById('btnSaveEntry').addEventListener('click', () => {
-    const date  = document.getElementById('entryDate').value;
-    const task  = document.getElementById('taskDesc').value.trim();
+    const date = document.getElementById('entryDate').value;
+    const task = document.getElementById('taskDesc').value.trim();
 
     if (!date)      { showToast('⚠️ Please select a date.');        return; }
     if (!timeIn24)  { showToast('⚠️ Please record your Time In.');  return; }
@@ -307,6 +362,9 @@ function initTimeLog() {
     const records = getRecords();
     records.push(record);
     saveRecords(records);
+
+    // NEW: I-clear ang active Time In session pagkatapos ma-save
+    clearActiveTimeIn();
 
     // Reset form
     timeIn24  = '';
@@ -415,10 +473,10 @@ function openEditModal(id) {
 }
 
 function initEditModal() {
-  const modal    = document.getElementById('editModal');
-  const closeBtn = document.getElementById('closeEditModal');
+  const modal     = document.getElementById('editModal');
+  const closeBtn  = document.getElementById('closeEditModal');
   const cancelBtn = document.getElementById('cancelEditModal');
-  const saveBtn  = document.getElementById('saveEdit');
+  const saveBtn   = document.getElementById('saveEdit');
 
   function closeModal() { modal.classList.remove('open'); }
 
